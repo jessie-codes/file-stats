@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/montanaflynn/stats"
 )
@@ -20,10 +21,13 @@ type statistics struct {
 }
 
 var (
-	lineLengths = []float64{}
-	tokenCounts = []float64{}
-	lines       = map[string]int{}
-	s           = statistics{}
+	lineLengths  = []float64{}
+	tokenCounts  = []float64{}
+	lines        = map[string]int{}
+	s            = statistics{}
+	wg           = sync.WaitGroup{}
+	countMutex   = sync.Mutex{}
+	keywordMutex = sync.Mutex{}
 )
 
 func loadKeywords(path string) {
@@ -54,16 +58,19 @@ func readFiles(files []string) {
 
 		scanner := bufio.NewScanner(file)
 		for scanner.Scan() {
-			lineStats(scanner.Text())
+			wg.Add(1)
+			go lineStats(scanner.Text())
 		}
 
 		if err := scanner.Err(); err != nil {
 			log.Fatal(err)
 		}
 	}
+	wg.Wait()
 }
 
 func lineStats(line string) {
+	countMutex.Lock()
 	tokens := strings.Fields(line)
 	lineLengths = append(lineLengths, float64(len(line)))
 	tokenCounts = append(tokenCounts, float64(len(tokens)))
@@ -72,7 +79,9 @@ func lineStats(line string) {
 	if lines[line] > 1 {
 		s.NumDupes++
 	}
+	countMutex.Unlock()
 
+	keywordMutex.Lock()
 	for _, v := range tokens {
 		for i := range s.Keywords {
 			if i == v {
@@ -80,6 +89,8 @@ func lineStats(line string) {
 			}
 		}
 	}
+	keywordMutex.Unlock()
+	wg.Done()
 }
 
 func logResults(path string) {
