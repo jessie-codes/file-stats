@@ -78,10 +78,6 @@ func (s *statistics) readFiles(pattern string) *statistics {
 				s.lineStats(line)
 			}
 		}
-
-		if err := scanner.Err(); err != nil {
-			log.Fatal(err)
-		}
 	}
 
 	wg.Wait()
