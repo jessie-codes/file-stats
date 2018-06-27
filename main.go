@@ -33,7 +33,5 @@ func main() {
 }
 
 func action(c *cli.Context) {
-	loadKeywords(c.String("keyword"))
-	readFiles(c.String("input"))
-	logResults(c.String("output"))
+	newStatistics().loadKeywords(c.String("keyword")).readFiles(c.String("input")).calc().output(c.String("output"))
 }
