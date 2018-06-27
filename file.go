@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 
@@ -48,7 +49,8 @@ func loadKeywords(path string) {
 	}
 }
 
-func readFiles(files []string) {
+func readFiles(pattern string) {
+	files, _ := filepath.Glob(pattern)
 	for _, v := range files {
 		file, err := os.Open(v)
 		if err != nil {

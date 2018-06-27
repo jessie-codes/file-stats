@@ -12,9 +12,9 @@ func main() {
 	app.Name = "file-stats"
 
 	app.Flags = []cli.Flag{
-		cli.StringSliceFlag{
+		cli.StringFlag{
 			Name:  "input, i",
-			Usage: "`FILE` to get statistics for",
+			Usage: "`GLOB_PATTERN` of files to get statistics for",
 		},
 		cli.StringFlag{
 			Name:  "keyword, k",
@@ -34,6 +34,6 @@ func main() {
 
 func action(c *cli.Context) {
 	loadKeywords(c.String("keyword"))
-	readFiles(c.StringSlice("input"))
+	readFiles(c.String("input"))
 	logResults(c.String("output"))
 }
